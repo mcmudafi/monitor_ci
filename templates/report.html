@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block head %}
+
+<style>
+    td {
+        font-size:11pt;
+        font-family:Calibri, sans-serif;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<table class="table table-bordered table-sm w-auto">
+    {% for ci in data.cis %}
+    <tr>
+        <td><a href="{{ ci.url }}" target="_blank">{{ ci.name }}</a></td>
+        {% if ci.failing_projects %}
+        <td>
+            The following projects are failing:<br />
+            <ul>
+                {% for project in ci.failing_projects %}
+                <li>
+                    <a class="text-secondary" href="{{ project.url }}">{{ project.name }}</a>
+                    for <span class="text-danger">{{ project.broken_days }}</span> and currently
+                    {% if project.volunteer %}
+                    under investigation by <b class="text-primary"><i>{{ project.volunteer }}</i></b>
+                    {% else %}
+                    <b class="text-danger"><i>unattended</i></b>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </td>
+        {% else %}
+        <td class="text-success">All green!</td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

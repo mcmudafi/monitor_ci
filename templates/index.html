@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% if data.is_fetching %}
+<div class="d-flex justify-content-center bg-danger">
+    <h5 class="text-light text-uppercase m-2">Fetching data in progress. Please refresh later.</h5>
+</div>
+{% endif %}
+
+<div class="d-flex align-items-center my-2">
+    <img src="{{ url_for('static', filename='favicon.png') }}" width="48" >
+    <h2 class="flex-fill mx-2">Procurement Test Machines</h2>
+    <div class="d-flex flex-column">
+        <h5 class="ms-auto text-end">Last update: {{ data.last_update_fmtd }}</h5>
+        <a class="text-end" href="{{ url_for('report') }}" target="_blank">View summarize report</a>
+    </div>
+</div>
+
+{% for ci in data.cis %}
+<h4 class="card-title">
+    <a href="{{ ci.url }}" target="_blank" >{{ ci.name }}</a>
+    <small class="text-muted fw-light fst-italic"> - {{ ci.description }}</small>
+</h4>
+<div class="d-flex flex-column">
+    <span><b>Currently running:</b> {{ ci.current_run }}</span>
+    <span><b>ABW build:</b> {{ ci.last_abw_build_fmtd }}</span>
+    <span><b>DB update:</b> {{ ci.last_db_update_fmtd }}</span>
+    <span><b>DB refresh:</b> {{ ci.last_db_refresh_fmtd }}</span>
+    <span><b>Failing projects:</b> {{ ci.failing_projects_no }}</span>
+</div>
+{% if ci.failing_projects %}
+<div class="accordion" id="accordion{{ ci.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}">
+    {% for project in ci.failing_projects %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading{{ project.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}">
+            <button class="accordion-button bg-white text-dark d-flex p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ project.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}" aria-expanded="false" aria-controls="collapse{{ project.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}">
+                <div class="d-flex flex-column flex-fill">
+                    <span><b>{{ project.name }}</b></span>
+                    <span class="fst-italic fw-light">Last run: <b>{{ project.last_build_time_fmtd }}</b></span>
+                    <span class="text-danger">{{ project.failing_text }}</span>
+                </div>
+                <div class="d-flex flex-column align-items-end me-2">
+                    {% if project.volunteer %}
+                    <span>Volunteer: <b class="text-primary">{{ project.volunteer }}</b></span>
+                    {% else %}
+                    <span>Volunteer: <b class="text-danger">NO VOLUNTEER</b></span>
+                    {% endif %}
+                    <span>Broken for <b class="text-warning">{{ project.broken_days }}</b></span>
+                </div>
+            </button>
+        </h2>
+        <div id="collapse{{ project.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}" class="accordion-collapse collapse" aria-labelledby="heading{{ project.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}" data-bs-parent="#accordion{{ ci.name.replace(' ', '_').replace('-', '_').replace('.', '_') }}">
+            <div class="accordion-body">
+                <div class="d-flex justify-content-between">
+                    <span>Failing tests: {{ project.failing_tests_no }}</span>
+                    <span><a href="{{ project.last_build_link }}" target="_blank" >View last build report</a></span>
+                </div>
+                {% if project.test_results %}
+                <table class="table table-sm table-bordered table-hover table-danger">
+                    <tr>
+                        {% if project.test_results[0].stack_trace %}
+                        <th style="width: 20%;">Test name</th>
+                        <th style="width: 20%;">Error overview</th>
+                        <th style="width: 60%;">Stack trace</th>
+                        {% else %}
+                        <th style="width: 30%;">Test name</th>
+                        <th style="width: 70%;">Error overview</th>
+                        {% endif %}
+                    </tr>
+                    {% for test in project.test_results %}
+                    <tr>
+                        <td class="text-break">{{ test.name }}</td>
+                        <td class="text-break">{{ test.message }}</td>
+                        {% if test.stack_trace %}
+                        <td class="text-break">{{ test.stack_trace }}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% elif project.build_log %}
+                <pre><code>{{ project.build_log }}</code></pre>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+&nbsp;<br />
+{% endfor %}
+
+{% endblock %}

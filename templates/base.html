@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Test Machines</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}" />
+    <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}" />
+
+    {% block head %}
+    {% endblock %}
+</head>
+
+<body>
+    <div class="container-fluid p-2">
+        {% block body %}{% endblock %}
+    </div>
+</body>
+
+<script src="{{ url_for('static', filename='jquery.min.js') }}" ></script>
+<script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}" ></script>
+
+</html>

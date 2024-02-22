@@ -1,0 +1,19 @@
+version: '3'
+services:
+  flask-app:
+    restart: always
+    build:
+      context: .
+      dockerfile: dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - ngrok
+
+  ngrok:
+    restart: always
+    image: ngrok/ngrok
+    network_mode: "host"
+    environment:
+      - NGROK_AUTHTOKEN=<YOUR-NGROK-AUTHTOKEN>
+    command: http --domain=<YOUR-STATIC-DOMAIN> 5000
